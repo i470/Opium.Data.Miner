@@ -41,6 +41,7 @@
             <Button Content="Pull Coin Data" Margin="5" 
                   Click="Button_Click"/>
             <Button x:Name="btnToJson" Content="Save to JSON" Margin="5" Click="Button_Click_1"/>
+            <Button x:Name="btnToCSV" Content="Save to CSV" Margin="5" Click="btnToCSV_Click"/>
         </StackPanel>
 
     </Grid>

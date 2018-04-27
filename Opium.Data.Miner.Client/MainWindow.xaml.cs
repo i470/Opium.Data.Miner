@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using CsvHelper;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 
@@ -24,6 +25,7 @@ namespace Opium.Data.Miner.Client
             
 
             this.btnToJson.IsEnabled = false;
+            this.btnToCSV.IsEnabled = false;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -70,7 +72,7 @@ namespace Opium.Data.Miner.Client
             CryptoList = ls;
             this.datagrid.ItemsSource = CryptoList;
             this.btnToJson.IsEnabled = true;
-
+            this.btnToCSV.IsEnabled = true;
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
@@ -91,6 +93,28 @@ namespace Opium.Data.Miner.Client
             }
           
             
+        }
+
+        private void btnToCSV_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var filename = @"root-crypto.csv";
+
+                using (TextWriter writer = File.CreateText(path + "\\"+filename)) 
+                {
+                    var csv = new CsvWriter(writer);
+                    csv.WriteHeader<Crypto>();
+                    csv.WriteRecords(CryptoList);
+                }
+
+                MessageBox.Show("File name " + filename + " has been saved to your desktop", "OK");
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "ERROR");
+            }
         }
     }
 
