@@ -1,10 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using Newtonsoft.Json.Linq;
 using RestSharp;
-using NsExcel = Microsoft.Office.Interop.Excel;
+
 
 namespace Opium.Data.Miner.Client
 {
@@ -14,26 +15,27 @@ namespace Opium.Data.Miner.Client
     public partial class MainWindow : Window
     {
         public ObservableCollection<Crypto> CryptoList;
+        public JObject CryptoJasoJObject;
+
         public MainWindow()
         {
             InitializeComponent();
             CryptoList=new ObservableCollection<Crypto>();
+            CryptoJasoJObject=new JObject();
+
+            this.btnToJson.IsEnabled = false;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             var client = new RestClient("https://www.cryptocompare.com/api/data/");
-            // client.Authenticator = new HttpBasicAuthenticator(username, password);
-
             var request = new RestRequest("coinlist/", Method.POST);
-           // request.AddParameter("name", "value"); // adds to POST or URL querystring based on Method
-           
+          
 
             // execute the request
             IRestResponse response = client.Execute(request);
             JObject jObect = JObject.Parse(response.Content);
 
-            File.WriteAllText(@"C:\Users\Inga Bemman\root-crypto.json", jObect.SelectToken("Data").ToString());
 
             ObservableCollection<Crypto> ls  = new ObservableCollection<Crypto>();
             foreach (var c in jObect.SelectToken("Data"))
@@ -69,7 +71,16 @@ namespace Opium.Data.Miner.Client
           
 
         }
-        
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var filename = @"root-crypto.json";
+            
+            File.WriteAllText(path+filename, 
+                CryptoJasoJObject.SelectToken("Data").ToString());
+        }
     }
 
     public class Crypto
