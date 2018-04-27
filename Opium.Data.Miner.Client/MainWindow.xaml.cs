@@ -15,13 +15,13 @@ namespace Opium.Data.Miner.Client
     public partial class MainWindow : Window
     {
         public ObservableCollection<Crypto> CryptoList;
-        public JObject CryptoJasoJObject;
+        public JToken CryptoJToken;
 
         public MainWindow()
         {
             InitializeComponent();
             CryptoList=new ObservableCollection<Crypto>();
-            CryptoJasoJObject=new JObject();
+            
 
             this.btnToJson.IsEnabled = false;
         }
@@ -36,9 +36,10 @@ namespace Opium.Data.Miner.Client
             IRestResponse response = client.Execute(request);
             JObject jObect = JObject.Parse(response.Content);
 
+            CryptoJToken = jObect.SelectToken("Data");
 
             ObservableCollection<Crypto> ls  = new ObservableCollection<Crypto>();
-            foreach (var c in jObect.SelectToken("Data"))
+            foreach (var c in CryptoJToken)
             {
                 var x = c.Children().First().ToObject<Crypto>();
                 var url = x.Url;
@@ -68,18 +69,28 @@ namespace Opium.Data.Miner.Client
 
             CryptoList = ls;
             this.datagrid.ItemsSource = CryptoList;
-          
+            this.btnToJson.IsEnabled = true;
 
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var filename = @"root-crypto.json";
+
+                File.WriteAllText(path + filename,
+                    CryptoJToken.ToString());
+
+                MessageBox.Show("File name "+filename+" has been saved to your desktop", "OK");
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "ERROR");
+            }
+          
             
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var filename = @"root-crypto.json";
-            
-            File.WriteAllText(path+filename, 
-                CryptoJasoJObject.SelectToken("Data").ToString());
         }
     }
 
